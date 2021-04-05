@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>手机轮播</title>
+    <style>
+        body,
+        ul {
+            margin: 0;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .banner {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .swiper {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .swiper>ul {
+            width: 600vw;
+            height: 100vh;
+        }
+
+        .swiper>ul>li {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            float: left;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .swiper>ul>li>img {
+            width: 200px;
+            height: 200px;
+            background: #000;
+            transform: translateZ(0);
+            border-radius: 10px;
+        }
+
+        .bg {
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            background-image: url('images/1.jpg');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            filter: blur(10px)
+        }
+    </style>
+</head>
+
+<body>
+    <div class="banner">
+        <div class="bg"></div>
+        <div class="swiper">
+            <ul>
+                <li><img src="images/1.jpg" alt=""></li>
+                <li><img src="images/2.jpg" alt=""></li>
+                <li><img src="images/3.jpg" alt=""></li>
+                <li><img src="images/4.jpg" alt=""></li>
+                <li><img src="images/5.jpg" alt=""></li>
+                <li><img src="images/6.jpg" alt=""></li>
+            </ul>
+        </div>
+    </div>
+    <script>
+        let aLi = document.querySelectorAll(".swiper>ul>li"),
+            aUl = document.querySelector(".swiper>ul"),
+            aSw = document.querySelector(".swiper"),
+            aBg = document.querySelector(".bg");
+
+        aSw.addEventListener("touchstart", change);  //默认为false冒泡
+        aSw.addEventListener("touchmove", change);
+        aSw.addEventListener("touchend", change);
+
+        let x1, startX,
+            liWidth=aLi[0].offsetWidth,
+            liLength=aLi.length;
+        // aUl.transform = {};  //创建自定义对象存值;
+
+        function change(ev = window.event) {
+            switch (ev.type) {
+                case "touchstart":
+                    aUl.style.transition = '';
+                    x1 = ev.changedTouches[0].clientX;
+                    // startX = aUl.transform["translateX"] || 0;
+                    startX = cssTransform(aUl,'translateX');
+                    break;
+                case "touchmove":
+                    let x2 = ev.changedTouches[0].clientX;
+                    let nowX = startX + x2 - x1;
+                    // aUl.transform["translateX"] = nowX;
+                    // aUl.style.transform = `translateX(${nowX}px)`;
+                    cssTransform(aUl,'translateX',nowX);
+                    break;
+                case "touchend":
+                    let aUlOffset = cssTransform(aUl,"translateX");
+                    console.log(aUlOffset);
+                    aUlOffset = Math.min(0,aUlOffset);
+                    aUlOffset = Math.max(-(liLength-1)*liWidth,aUlOffset);
+                    let num = -Math.round(-aUlOffset/liWidth);
+                    // aUl.transform["translateX"] = num*liWidth;
+                    cssTransform(aUl,'translateX',(num*liWidth));
+                    aUl.style.transition = '0.5s';
+                    // aUl.style.transform =  `translateX(${num*liWidth}px)`;
+                    aBg.style.backgroundImage=`url(images/${-num+1}.jpg)`;
+                    break;
+            }
+        }
+
+        /*
+            level up
+        */
+        function cssTransform(obj,attr,value){
+            if(!obj.transform){
+                obj.transform={};
+            }
+            switch(arguments.length){
+                case 2:
+                    return obj.transform[attr] || 0 ;
+                    break;
+                case 3:
+                    obj.transform[attr]=value;
+                    let s='';
+                    /*
+                        Object.keys()方法会返回一个由一个给定对象的自身可枚举属性组成的数组。
+
+                    */
+                    Object.keys(obj.transform).forEach(key => {
+                        console.log( Object.keys(obj.transform)); 
+                        console.log( key); //obj.transform返回的数组的名
+                        console.log( obj.transform[key]);
+                        switch(key){
+                            case"translate":
+                            case"translateX":
+                            case"translateY":
+                            case"translateZ":
+                                s+=`${key}(${obj.transform[key]}px)`;
+                                break;
+                        }
+                        obj.style.transform = s;
+                    });
+                    break;    
+            }
+        }
+
+    </script>
+</body>
+
+</html>
